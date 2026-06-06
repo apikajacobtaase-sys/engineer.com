@@ -1,0 +1,1181 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@600;700&display=swap');
+
+  *{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --bg:#0d1117;--bg2:#161b22;--bg3:#1f2937;--bg4:#273040;
+    --border:#30363d;--border2:#444c56;
+    --text:#e6edf3;--text2:#8b949e;--text3:#6e7681;
+    --amber:#f0b429;--amber2:#ffd257;--amberDim:#7a5a10;
+    --teal:#0d9488;--teal2:#2dd4bf;--tealDim:#0f3d38;
+    --red:#f85149;--redDim:#4a0f0f;
+    --green:#3fb950;--greenDim:#0d3a1a;
+    --blue:#388bfd;--blueDim:#0d2750;
+    --radius:8px;--radius2:12px;
+  }
+  body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;font-size:14px;min-height:100vh}
+  
+  .shell{display:flex;flex-direction:column;min-height:100vh}
+  
+  /* TOP BAR */
+  .topbar{background:var(--bg2);border-bottom:1px solid var(--border);padding:0 24px;display:flex;align-items:center;gap:16px;height:52px;position:sticky;top:0;z-index:100}
+  .logo{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:700;color:var(--amber);letter-spacing:1px}
+  .logo span{color:var(--text2);font-weight:400;font-size:13px;margin-left:8px;letter-spacing:0}
+  .badge{background:var(--amberDim);color:var(--amber);padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600;letter-spacing:.5px}
+  .nav-tabs{display:flex;gap:4px;margin-left:auto}
+  .nav-tab{padding:6px 16px;border-radius:6px;border:1px solid transparent;cursor:pointer;font-size:13px;font-weight:500;transition:.15s;background:transparent;color:var(--text2)}
+  .nav-tab.active{background:var(--bg3);border-color:var(--border2);color:var(--amber)}
+  .nav-tab:hover:not(.active){background:var(--bg3);color:var(--text)}
+
+  /* MAIN LAYOUT */
+  .main{display:flex;flex:1;gap:0}
+  .sidebar{width:240px;background:var(--bg2);border-right:1px solid var(--border);padding:16px;flex-shrink:0}
+  .content{flex:1;padding:24px;overflow-y:auto;max-height:calc(100vh - 52px)}
+  
+  .sidebar-section{margin-bottom:20px}
+  .sidebar-label{font-size:10px;font-weight:700;letter-spacing:1.5px;color:var(--text3);text-transform:uppercase;margin-bottom:8px;padding:0 4px}
+  .sidebar-item{padding:8px 10px;border-radius:var(--radius);cursor:pointer;font-size:13px;color:var(--text2);transition:.12s;border:1px solid transparent;margin-bottom:2px;display:flex;align-items:center;gap:8px}
+  .sidebar-item:hover{background:var(--bg3);color:var(--text)}
+  .sidebar-item.active{background:var(--bg4);border-color:var(--border2);color:var(--amber)}
+  .sidebar-dot{width:6px;height:6px;border-radius:50%;background:currentColor;flex-shrink:0}
+  .sidebar-item.active .sidebar-dot{background:var(--amber)}
+
+  /* FORM ELEMENTS */
+  .field{margin-bottom:16px}
+  .field label{display:block;font-size:12px;font-weight:600;color:var(--text2);margin-bottom:6px;letter-spacing:.3px}
+  .field input,.field select{width:100%;background:var(--bg);border:1px solid var(--border2);border-radius:var(--radius);padding:8px 12px;color:var(--text);font-family:'Barlow',sans-serif;font-size:14px;outline:none;transition:.15s}
+  .field input:focus,.field select:focus{border-color:var(--amber);box-shadow:0 0 0 3px rgba(240,180,41,.12)}
+  .field select option{background:var(--bg2)}
+  .field-hint{font-size:11px;color:var(--text3);margin-top:4px}
+  .field-unit{font-size:11px;color:var(--amber);margin-top:4px}
+
+  .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
+
+  /* CARDS */
+  .card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius2);padding:20px;margin-bottom:16px}
+  .card-title{font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;color:var(--text);letter-spacing:.5px;margin-bottom:4px;display:flex;align-items:center;gap:8px}
+  .card-sub{font-size:12px;color:var(--text3);margin-bottom:16px}
+  .card-divider{border:none;border-top:1px solid var(--border);margin:16px 0}
+
+  /* RESULT BLOCKS */
+  .result-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:20px}
+  .result-card{background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius);padding:14px 16px}
+  .result-label{font-size:11px;font-weight:600;color:var(--text3);letter-spacing:.8px;text-transform:uppercase;margin-bottom:6px}
+  .result-value{font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:700;color:var(--amber2);line-height:1}
+  .result-unit{font-size:11px;color:var(--text2);margin-top:4px}
+  .result-card.ok{border-color:var(--teal)}
+  .result-card.ok .result-value{color:var(--teal2)}
+  .result-card.warn{border-color:#e9a800}
+  .result-card.warn .result-value{color:#ffd257}
+  .result-card.danger{border-color:var(--red);background:var(--redDim)}
+  .result-card.danger .result-value{color:var(--red)}
+
+  /* ALERTS */
+  .alert{padding:12px 16px;border-radius:var(--radius);font-size:13px;margin-bottom:12px;display:flex;align-items:flex-start;gap:10px}
+  .alert-icon{font-size:16px;flex-shrink:0;margin-top:1px}
+  .alert.ok{background:var(--greenDim);border:1px solid var(--green);color:#a7f3d0}
+  .alert.warn{background:#2d2210;border:1px solid #e9a800;color:#fcd34d}
+  .alert.danger{background:var(--redDim);border:1px solid var(--red);color:#fca5a5}
+  .alert.info{background:var(--blueDim);border:1px solid var(--blue);color:#93c5fd}
+
+  /* BUTTONS */
+  .btn{padding:10px 20px;border-radius:var(--radius);font-family:'Barlow',sans-serif;font-size:14px;font-weight:600;cursor:pointer;transition:.15s;border:1px solid;display:inline-flex;align-items:center;gap:8px}
+  .btn-primary{background:var(--amber);border-color:var(--amber);color:#0d1117}
+  .btn-primary:hover{background:var(--amber2);border-color:var(--amber2)}
+  .btn-secondary{background:transparent;border-color:var(--border2);color:var(--text2)}
+  .btn-secondary:hover{background:var(--bg3);color:var(--text)}
+  .btn-teal{background:var(--teal);border-color:var(--teal);color:#fff}
+  .btn-teal:hover{background:var(--teal2);border-color:var(--teal2);color:#000}
+
+  /* PROGRESS BAR */
+  .pbar-wrap{background:var(--bg3);border-radius:4px;height:8px;overflow:hidden;margin-top:8px}
+  .pbar{height:100%;border-radius:4px;transition:width .4s ease}
+  .pbar.ok{background:var(--teal)}
+  .pbar.warn{background:var(--amber)}
+  .pbar.danger{background:var(--red)}
+
+  /* TABLE */
+  .data-table{width:100%;border-collapse:collapse;font-size:13px}
+  .data-table th{background:var(--bg3);color:var(--text2);font-weight:600;padding:10px 14px;text-align:left;border-bottom:1px solid var(--border2);font-size:11px;letter-spacing:.8px;text-transform:uppercase}
+  .data-table td{padding:10px 14px;border-bottom:1px solid var(--border);color:var(--text);font-family:'JetBrains Mono',monospace;font-size:13px}
+  .data-table tr:last-child td{border-bottom:none}
+  .data-table tr:hover td{background:var(--bg3)}
+  .td-label{font-family:'Barlow',sans-serif;color:var(--text2)}
+  .td-ok{color:var(--teal2)}
+  .td-warn{color:var(--amber2)}
+  .td-danger{color:var(--red)}
+
+  /* SECTION HEADERS */
+  .section-header{margin-bottom:20px}
+  .section-title{font-family:'Barlow Condensed',sans-serif;font-size:26px;font-weight:700;color:var(--text);letter-spacing:.5px}
+  .section-sub{font-size:13px;color:var(--text2);margin-top:4px}
+  .section-tag{display:inline-block;background:var(--amberDim);color:var(--amber);padding:3px 10px;border-radius:4px;font-size:11px;font-weight:700;letter-spacing:.8px;margin-bottom:8px}
+
+  /* EQUATION BLOCK */
+  .eq-block{background:var(--bg);border:1px solid var(--border2);border-radius:var(--radius);padding:12px 16px;margin:12px 0;font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--teal2);line-height:1.8}
+  .eq-comment{color:var(--text3);font-size:12px}
+
+  /* STEP INDICATOR */
+  .steps{display:flex;gap:0;margin-bottom:24px}
+  .step{flex:1;padding:10px 14px;background:var(--bg3);border:1px solid var(--border);font-size:12px;font-weight:600;color:var(--text3);text-align:center;cursor:pointer;transition:.15s}
+  .step:first-child{border-radius:var(--radius) 0 0 var(--radius)}
+  .step:last-child{border-radius:0 var(--radius) var(--radius) 0}
+  .step.active{background:var(--bg4);border-color:var(--amber);color:var(--amber)}
+
+  /* GAUGE */
+  .gauge-row{display:flex;align-items:center;gap:12px;margin-bottom:8px}
+  .gauge-label{font-size:12px;color:var(--text2);width:130px;flex-shrink:0}
+  .gauge-bar{flex:1;height:6px;background:var(--bg3);border-radius:3px;overflow:hidden}
+  .gauge-fill{height:100%;border-radius:3px}
+  .gauge-val{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--text2);width:70px;text-align:right}
+
+  /* REPORT */
+  .report-box{background:var(--bg);border:1px solid var(--teal);border-radius:var(--radius2);padding:20px;margin-top:16px}
+  .report-title{font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;color:var(--teal2);margin-bottom:12px;letter-spacing:.5px}
+  .report-row{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border);font-size:13px}
+  .report-row:last-child{border-bottom:none}
+  .report-key{color:var(--text2)}
+  .report-val{font-family:'JetBrains Mono',monospace;color:var(--text);font-weight:500}
+
+  .tab-panels{display:none}
+  .tab-panels.active{display:block}
+  .hidden{display:none}
+
+  input[type=number]::-webkit-inner-spin-button{opacity:.5}
+</style>
+</head>
+<body>
+<div class="shell">
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="logo">PyMudCement<span>— Optima v1.0</span></div>
+  <div class="badge">PENG 258</div>
+  <div class="nav-tabs">
+    <button class="nav-tab active" onclick="switchModule('mud')">⬡ Drilling Fluids</button>
+    <button class="nav-tab" onclick="switchModule('cement')">⬡ Cementing</button>
+    <button class="nav-tab" onclick="switchModule('report')">⬡ Job Report</button>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- SIDEBAR: MUD -->
+  <div class="sidebar" id="sidebar-mud">
+    <div class="sidebar-section">
+      <div class="sidebar-label">Fluid Design</div>
+      <div class="sidebar-item active" onclick="switchPage('mud','hydrostatic')"><div class="sidebar-dot"></div> Hydrostatic Balance</div>
+      <div class="sidebar-item" onclick="switchPage('mud','rheology')"><div class="sidebar-dot"></div> Rheology (PV/YP)</div>
+      <div class="sidebar-item" onclick="switchPage('mud','hydraulics')"><div class="sidebar-dot"></div> Annular Hydraulics</div>
+      <div class="sidebar-item" onclick="switchPage('mud','ecd')"><div class="sidebar-dot"></div> ECD & Hole Cleaning</div>
+    </div>
+  </div>
+
+  <!-- SIDEBAR: CEMENT -->
+  <div class="sidebar hidden" id="sidebar-cement">
+    <div class="sidebar-section">
+      <div class="sidebar-label">Cementing Design</div>
+      <div class="sidebar-item active" onclick="switchPage('cement','volumes')"><div class="sidebar-dot"></div> Slurry Volumes</div>
+      <div class="sidebar-item" onclick="switchPage('cement','slurry')"><div class="sidebar-dot"></div> Slurry & Additives</div>
+      <div class="sidebar-item" onclick="switchPage('cement','bumping')"><div class="sidebar-dot"></div> Plug Bumping Pressure</div>
+      <div class="sidebar-item" onclick="switchPage('cement','panda')"><div class="sidebar-dot"></div> P&A / Suspension</div>
+    </div>
+  </div>
+
+  <!-- SIDEBAR: REPORT -->
+  <div class="sidebar hidden" id="sidebar-report">
+    <div class="sidebar-section">
+      <div class="sidebar-label">Job Documents</div>
+      <div class="sidebar-item active"><div class="sidebar-dot"></div> Cementing Job Sheet</div>
+      <div class="sidebar-item"><div class="sidebar-dot"></div> Mud Summary</div>
+    </div>
+  </div>
+
+  <!-- CONTENT -->
+  <div class="content" id="content-area">
+
+    <!-- ============ MUD MODULE ============ -->
+
+    <!-- PAGE: HYDROSTATIC -->
+    <div id="page-mud-hydrostatic" class="tab-panels active">
+      <div class="section-header">
+        <div class="section-tag">DRILLING FLUIDS</div>
+        <div class="section-title">Hydrostatic Pressure Balance</div>
+        <div class="section-sub">Calculate minimum mud weight to balance formation pore pressure and verify well control window.</div>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title">📋 Formation Inputs</div>
+          <div class="card-sub">Wellbore geometry and pressure data</div>
+          <div class="grid-2">
+            <div class="field">
+              <label>True Vertical Depth (m)</label>
+              <input type="number" id="h_tvd" value="3500" min="0" oninput="calcHydrostatic()">
+              <div class="field-unit">TVD in metres</div>
+            </div>
+            <div class="field">
+              <label>Pore Pressure Gradient (kPa/m)</label>
+              <input type="number" id="h_ppg" value="10.5" step="0.1" min="0" oninput="calcHydrostatic()">
+              <div class="field-unit">Formation pore pressure gradient</div>
+            </div>
+          </div>
+          <div class="grid-2">
+            <div class="field">
+              <label>Fracture Gradient (kPa/m)</label>
+              <input type="number" id="h_fg" value="18.2" step="0.1" min="0" oninput="calcHydrostatic()">
+              <div class="field-unit">Upper limit before lost circ.</div>
+            </div>
+            <div class="field">
+              <label>Overbalance Margin (%)</label>
+              <input type="number" id="h_ob" value="5" step="0.5" min="0" max="20" oninput="calcHydrostatic()">
+              <div class="field-unit">Safety overbalance (typically 3–8%)</div>
+            </div>
+          </div>
+          <div class="field">
+            <label>Designed Mud Weight (kg/m³)</label>
+            <input type="number" id="h_mw" value="1150" min="800" max="2400" oninput="calcHydrostatic()">
+            <div class="field-hint">Input your proposed mud weight to validate against the window</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">⚡ Equations Applied</div>
+          <div class="card-sub">Core mathematical framework (SPE standard)</div>
+          <div class="eq-block">
+            P_hydrostatic = ρ_mud × g × TVD<br>
+            <span class="eq-comment">// Hydrostatic pressure (Pa)</span>
+            <br><br>
+            ρ_min = P_pore / (g × TVD)<br>
+            <span class="eq-comment">// Minimum required mud density</span>
+            <br><br>
+            ρ_max = P_frac / (g × TVD)<br>
+            <span class="eq-comment">// Max density before frac gradient</span>
+            <br><br>
+            MW_design ≥ ρ_min × (1 + OB%)<br>
+            <span class="eq-comment">// With overbalance safety factor</span>
+          </div>
+          <div class="field">
+            <label>Gravity (m/s²)</label>
+            <input type="number" value="9.81" readonly style="opacity:.6;cursor:not-allowed">
+          </div>
+        </div>
+      </div>
+
+      <!-- Results -->
+      <div class="card" id="h_results">
+        <div class="card-title">📊 Calculated Results</div>
+        <div class="result-grid" id="h_result_grid"></div>
+        <div id="h_alert"></div>
+        <hr class="card-divider">
+        <div class="card-sub" style="margin-bottom:8px">Mud Weight vs. Safe Drilling Window</div>
+        <div id="h_gauges"></div>
+      </div>
+    </div>
+
+    <!-- PAGE: RHEOLOGY -->
+    <div id="page-mud-rheology" class="tab-panels">
+      <div class="section-header">
+        <div class="section-tag">DRILLING FLUIDS</div>
+        <div class="section-title">Rheological Profiling — Bingham-Plastic Model</div>
+        <div class="section-sub">Process digital mud report data. Evaluate PV, YP, and shear stress at operating conditions.</div>
+      </div>
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title">🧪 Mud Report Parser</div>
+          <div class="card-sub">Input field mud report values (FANN VG meter readings)</div>
+          <div class="grid-2">
+            <div class="field">
+              <label>θ600 Reading (RPM dial)</label>
+              <input type="number" id="r_600" value="65" min="0" oninput="calcRheology()">
+            </div>
+            <div class="field">
+              <label>θ300 Reading (RPM dial)</label>
+              <input type="number" id="r_300" value="40" min="0" oninput="calcRheology()">
+            </div>
+          </div>
+          <div class="grid-2">
+            <div class="field">
+              <label>Mud Weight (kg/m³)</label>
+              <input type="number" id="r_mw" value="1150" oninput="calcRheology()">
+            </div>
+            <div class="field">
+              <label>Flow Rate (L/min)</label>
+              <input type="number" id="r_q" value="1600" oninput="calcRheology()">
+            </div>
+          </div>
+          <div class="grid-2">
+            <div class="field">
+              <label>Pipe ID (mm)</label>
+              <input type="number" id="r_id" value="114" oninput="calcRheology()">
+            </div>
+            <div class="field">
+              <label>Shear Rate to Evaluate (s⁻¹)</label>
+              <input type="number" id="r_sr" value="100" oninput="calcRheology()">
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">📐 Bingham-Plastic Equations</div>
+          <div class="card-sub">Industry-standard rheological model</div>
+          <div class="eq-block">
+            PV = θ600 − θ300<br>
+            <span class="eq-comment">// Plastic Viscosity (mPa·s)</span>
+            <br><br>
+            YP = θ300 − PV<br>
+            <span class="eq-comment">// Yield Point (Pa × 0.4788 → Pa)</span>
+            <br><br>
+            τ = YP + PV × γ̇<br>
+            <span class="eq-comment">// Bingham shear stress</span>
+            <br><br>
+            Re = 109 × ρ × v × d / PV<br>
+            <span class="eq-comment">// Modified Reynolds number</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">📊 Rheology Results</div>
+        <div class="result-grid" id="r_result_grid"></div>
+        <div id="r_alert"></div>
+        <hr class="card-divider">
+        <div class="card-sub" style="margin-bottom:12px">Rheological Classification Table</div>
+        <table class="data-table">
+          <thead><tr><th>Parameter</th><th>Value</th><th>API Range</th><th>Status</th></tr></thead>
+          <tbody id="r_table"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- PAGE: HYDRAULICS -->
+    <div id="page-mud-hydraulics" class="tab-panels">
+      <div class="section-header">
+        <div class="section-tag">DRILLING FLUIDS</div>
+        <div class="section-title">Annular Hydraulics & Pressure Drops</div>
+        <div class="section-sub">Model non-Newtonian fluid flow mechanics and pressure losses across the circulating system.</div>
+      </div>
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title">🔩 Wellbore Geometry</div>
+          <div class="card-sub">Casing and hole dimensions for hydraulics</div>
+          <div class="grid-2">
+            <div class="field"><label>Hole Diameter (mm)</label><input type="number" id="hyd_dh" value="311" oninput="calcHydraulics()"></div>
+            <div class="field"><label>Drill Pipe OD (mm)</label><input type="number" id="hyd_dpod" value="127" oninput="calcHydraulics()"></div>
+          </div>
+          <div class="grid-2">
+            <div class="field"><label>Interval Length (m)</label><input type="number" id="hyd_len" value="2800" oninput="calcHydraulics()"></div>
+            <div class="field"><label>Flow Rate (L/min)</label><input type="number" id="hyd_q" value="1800" oninput="calcHydraulics()"></div>
+          </div>
+          <div class="grid-2">
+            <div class="field"><label>Mud Weight (kg/m³)</label><input type="number" id="hyd_mw" value="1150" oninput="calcHydraulics()"></div>
+            <div class="field"><label>PV (mPa·s)</label><input type="number" id="hyd_pv" value="25" oninput="calcHydraulics()"></div>
+          </div>
+          <div class="grid-2">
+            <div class="field"><label>YP (Pa)</label><input type="number" id="hyd_yp" value="12" oninput="calcHydraulics()"></div>
+            <div class="field"><label>Drill Bit Nozzle Area (cm²)</label><input type="number" id="hyd_noz" value="2.5" step="0.1" oninput="calcHydraulics()"></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">📊 Pressure Drop Breakdown</div>
+          <div class="card-sub">System hydraulics summary (kPa)</div>
+          <div id="hyd_result_grid" class="result-grid"></div>
+          <div id="hyd_alert"></div>
+          <hr class="card-divider">
+          <div id="hyd_gauges"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PAGE: ECD -->
+    <div id="page-mud-ecd" class="tab-panels">
+      <div class="section-header">
+        <div class="section-tag">DRILLING FLUIDS</div>
+        <div class="section-title">ECD & Hole Cleaning Analysis</div>
+        <div class="section-sub">Determine cuttings transport efficiency. Calculate Equivalent Circulating Density to prevent wellbore instability.</div>
+      </div>
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title">🪨 Cuttings & Transport Data</div>
+          <div class="grid-2">
+            <div class="field"><label>Static Mud Weight (kg/m³)</label><input type="number" id="ecd_mw" value="1150" oninput="calcECD()"></div>
+            <div class="field"><label>TVD (m)</label><input type="number" id="ecd_tvd" value="3500" oninput="calcECD()"></div>
+          </div>
+          <div class="grid-2">
+            <div class="field"><label>Annular Pressure Loss (kPa)</label><input type="number" id="ecd_apl" value="1850" oninput="calcECD()"></div>
+            <div class="field"><label>ROP (m/hr)</label><input type="number" id="ecd_rop" value="15" oninput="calcECD()"></div>
+          </div>
+          <div class="grid-2">
+            <div class="field"><label>Hole Diameter (mm)</label><input type="number" id="ecd_dh" value="311" oninput="calcECD()"></div>
+            <div class="field"><label>Drill Pipe OD (mm)</label><input type="number" id="ecd_dp" value="127" oninput="calcECD()"></div>
+          </div>
+          <div class="grid-2">
+            <div class="field"><label>Annular Velocity (m/min)</label><input type="number" id="ecd_av" value="45" oninput="calcECD()"></div>
+            <div class="field"><label>Cuttings Specific Gravity</label><input type="number" id="ecd_csg" value="2.6" step="0.1" oninput="calcECD()"></div>
+          </div>
+          <div class="field"><label>Fracture Gradient at TVD (kPa/m)</label><input type="number" id="ecd_fg" value="18.2" step="0.1" oninput="calcECD()"></div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">📊 ECD Results</div>
+          <div id="ecd_result_grid" class="result-grid"></div>
+          <div id="ecd_alert"></div>
+          <hr class="card-divider">
+          <div class="card-sub" style="margin-bottom:10px">Hole Cleaning Efficiency Indicators</div>
+          <div id="ecd_table"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ CEMENT MODULE ============ -->
+
+    <!-- PAGE: VOLUMES -->
+    <div id="page-cement-volumes" class="tab-panels">
+      <div class="section-header">
+        <div class="section-tag">CEMENTING</div>
+        <div class="section-title">Annular Volumetric Calculations</div>
+        <div class="section-sub">Precise slurry, spacer, and displacement fluid volumes for primary cementing operations.</div>
+      </div>
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title">🏗️ Casing & Hole Configuration</div>
+          <div class="card-sub">Input wellbore geometry for the cement job interval</div>
+          <div class="grid-2">
+            <div class="field"><label>Open Hole Diameter (m)</label><input type="number" id="cv_dhole" value="0.311" step="0.001" oninput="calcVolumes()"></div>
+            <div class="field"><label>Casing OD (m)</label><input type="number" id="cv_cod" value="0.2445" step="0.001" oninput="calcVolumes()"></div>
+          </div>
+          <div class="grid-2">
+            <div class="field"><label>Casing ID (m)</label><input type="number" id="cv_cid" value="0.2202" step="0.001" oninput="calcVolumes()"></div>
+            <div class="field"><label>Cement Interval Length (m)</label><input type="number" id="cv_len" value="1200" oninput="calcVolumes()"></div>
+          </div>
+          <div class="grid-2">
+            <div class="field"><label>Washout / Excess Factor (%)</label><input type="number" id="cv_excess" value="15" step="1" oninput="calcVolumes()"></div>
+            <div class="field"><label>Tail Slurry % of Annulus</label><input type="number" id="cv_tail_pct" value="30" step="5" oninput="calcVolumes()"></div>
+          </div>
+          <div class="grid-2">
+            <div class="field"><label>Lead Slurry Density (kg/m³)</label><input type="number" id="cv_ld" value="1500" oninput="calcVolumes()"></div>
+            <div class="field"><label>Tail Slurry Density (kg/m³)</label><input type="number" id="cv_td" value="1900" oninput="calcVolumes()"></div>
+          </div>
+          <div class="grid-2">
+            <div class="field"><label>Spacer Volume (m³)</label><input type="number" id="cv_spacer" value="3" step="0.5" oninput="calcVolumes()"></div>
+            <div class="field"><label>Mud Density (kg/m³)</label><input type="number" id="cv_mud" value="1150" oninput="calcVolumes()"></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">📐 Volume Equations</div>
+          <div class="card-sub">Based on SPE annular volumetrics</div>
+          <div class="eq-block">
+            V_ann = (π/4) × (D²hole − D²casing) × L × (1 + We)<br>
+            <span class="eq-comment">// Annular volume with excess factor</span>
+            <br><br>
+            V_casing = (π/4) × D²cid × L_casing<br>
+            <span class="eq-comment">// Casing internal volume (displacement)</span>
+            <br><br>
+            V_tail = V_ann × (tail_pct / 100)<br>
+            <span class="eq-comment">// Tail slurry at bottom of annulus</span>
+            <br><br>
+            V_lead = V_ann − V_tail<br>
+            <span class="eq-comment">// Lead slurry fills remaining annulus</span>
+          </div>
+          <div id="cv_result_grid" class="result-grid" style="margin-top:16px"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">📊 Cementing Volume Summary</div>
+        <table class="data-table">
+          <thead><tr><th>Fluid Segment</th><th>Volume (m³)</th><th>Volume (bbl)</th><th>Mass (tonnes)</th><th>Density (kg/m³)</th></tr></thead>
+          <tbody id="cv_table"></tbody>
+        </table>
+        <div id="cv_alert" style="margin-top:12px"></div>
+      </div>
+    </div>
+
+    <!-- PAGE: SLURRY -->
+    <div id="page-cement-slurry" class="tab-panels">
+      <div class="section-header">
+        <div class="section-tag">CEMENTING</div>
+        <div class="section-title">Slurry Design & Additive Lookup</div>
+        <div class="section-sub">Automated slurry design with BHT-based additive recommendations and pump time estimation.</div>
+      </div>
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title">🌡️ Wellbore Conditions</div>
+          <div class="grid-2">
+            <div class="field"><label>Bottom Hole Temp (°C)</label><input type="number" id="sl_bht" value="120" oninput="calcSlurry()"></div>
+            <div class="field"><label>Surface Temp (°C)</label><input type="number" id="sl_st" value="30" oninput="calcSlurry()"></div>
+          </div>
+          <div class="grid-2">
+            <div class="field"><label>Target Slurry Density (kg/m³)</label><input type="number" id="sl_density" value="1900" oninput="calcSlurry()"></div>
+            <div class="field"><label>Total Volume to Mix (m³)</label><input type="number" id="sl_vol" value="12" step="0.5" oninput="calcSlurry()"></div>
+          </div>
+          <div class="field">
+            <label>Cementing Application</label>
+            <select id="sl_app" onchange="calcSlurry()">
+              <option value="primary">Primary Casing Cement</option>
+              <option value="liner">Liner Cementing</option>
+              <option value="plug">Cement Plug</option>
+              <option value="abandonment">P&A / Abandonment</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Cement API Class</label>
+            <select id="sl_class" onchange="calcSlurry()">
+              <option value="G">Class G (most common)</option>
+              <option value="H">Class H (coarser grind)</option>
+              <option value="A">Class A (shallow wells)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">💊 Additive Recommendations</div>
+          <div class="card-sub">AI-lookup based on BHT, application, and class</div>
+          <div id="sl_additives"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">⏱️ Pump Time & Mix Design</div>
+        <div class="result-grid" id="sl_result_grid"></div>
+        <div id="sl_alert"></div>
+        <hr class="card-divider">
+        <table class="data-table">
+          <thead><tr><th>Additive</th><th>Type</th><th>Dosage (BWOC)</th><th>Function</th></tr></thead>
+          <tbody id="sl_table"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- PAGE: BUMPING PRESSURE -->
+    <div id="page-cement-bumping" class="tab-panels">
+      <div class="section-header">
+        <div class="section-tag">CEMENTING</div>
+        <div class="section-title">Plug Bumping Pressure Calculator</div>
+        <div class="section-sub">Establish safe operational pressure limits for the rig crew at plug bump. Prevent casing collapse or formation fracture.</div>
+      </div>
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title">🔧 Cement Job Parameters</div>
+          <div class="grid-2">
+            <div class="field"><label>TVD to Float Shoe (m)</label><input type="number" id="bp_tvd" value="3500" oninput="calcBumping()"></div>
+            <div class="field"><label>Slurry Density (kg/m³)</label><input type="number" id="bp_sd" value="1900" oninput="calcBumping()"></div>
+          </div>
+          <div class="grid-2">
+            <div class="field"><label>Displacement Fluid Density (kg/m³)</label><input type="number" id="bp_dd" value="1150" oninput="calcBumping()"></div>
+            <div class="field"><label>Casing Burst Rating (kPa)</label><input type="number" id="bp_burst" value="45000" oninput="calcBumping()"></div>
+          </div>
+          <div class="grid-2">
+            <div class="field"><label>Surface Pump Pressure (kPa)</label><input type="number" id="bp_pump" value="8000" oninput="calcBumping()"></div>
+            <div class="field"><label>Casing ID (m)</label><input type="number" id="bp_cid" value="0.2202" step="0.001" oninput="calcBumping()"></div>
+          </div>
+          <div class="field"><label>Fracture Gradient at Shoe (kPa/m)</label><input type="number" id="bp_fg" value="18.5" step="0.1" oninput="calcBumping()"></div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">📊 Bumping Pressure Results</div>
+          <div id="bp_result_grid" class="result-grid"></div>
+          <div id="bp_alert"></div>
+          <hr class="card-divider">
+          <div id="bp_gauges"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PAGE: P&A -->
+    <div id="page-cement-panda" class="tab-panels">
+      <div class="section-header">
+        <div class="section-tag">CEMENTING</div>
+        <div class="section-title">P&A Plug Design — Suspension & Abandonment</div>
+        <div class="section-sub">Design balanced cement plugs for open-hole sidetracking, well suspension, or permanent plug and abandonment.</div>
+      </div>
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title">🔒 Plug Design Parameters</div>
+          <div class="field">
+            <label>Plug Objective</label>
+            <select id="pa_type" onchange="calcPandA()">
+              <option value="panda">Permanent P&A</option>
+              <option value="suspension">Well Suspension</option>
+              <option value="sidetrack">Open-Hole Sidetrack</option>
+              <option value="kickoff">Kick-off Plug</option>
+            </select>
+          </div>
+          <div class="grid-2">
+            <div class="field"><label>Plug Top Depth (m)</label><input type="number" id="pa_top" value="3200" oninput="calcPandA()"></div>
+            <div class="field"><label>Plug Bottom Depth (m)</label><input type="number" id="pa_bot" value="3500" oninput="calcPandA()"></div>
+          </div>
+          <div class="grid-2">
+            <div class="field"><label>Hole Diameter (m)</label><input type="number" id="pa_dh" value="0.216" step="0.001" oninput="calcPandA()"></div>
+            <div class="field"><label>Drillpipe OD (m)</label><input type="number" id="pa_dp" value="0.127" step="0.001" oninput="calcPandA()"></div>
+          </div>
+          <div class="grid-2">
+            <div class="field"><label>Drillpipe ID (m)</label><input type="number" id="pa_dpid" value="0.108" step="0.001" oninput="calcPandA()"></div>
+            <div class="field"><label>Cement Slurry Density (kg/m³)</label><input type="number" id="pa_cd" value="1900" oninput="calcPandA()"></div>
+          </div>
+          <div class="field"><label>Pump Rate (L/min)</label><input type="number" id="pa_pr" value="600" oninput="calcPandA()"></div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">📊 Plug Design Results</div>
+          <div id="pa_result_grid" class="result-grid"></div>
+          <div id="pa_alert"></div>
+          <hr class="card-divider">
+          <div class="card-sub" style="margin-bottom:10px">Plug Placement Procedure</div>
+          <div id="pa_procedure"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ REPORT MODULE ============ -->
+    <div id="page-report-report" class="tab-panels">
+      <div class="section-header">
+        <div class="section-tag">JOB REPORT</div>
+        <div class="section-title">Digital Cementing Job Procedure Sheet</div>
+        <div class="section-sub">Auto-generated from all module inputs. Review before operations.</div>
+      </div>
+      <div class="card">
+        <div class="card-title">📝 Well Information Header</div>
+        <div class="grid-3">
+          <div class="field"><label>Well Name</label><input type="text" id="rep_well" value="UENR-JUBILEE-001" oninput="buildReport()"></div>
+          <div class="field"><label>Field</label><input type="text" id="rep_field" value="Jubilee Field, Ghana" oninput="buildReport()"></div>
+          <div class="field"><label>Rig Name</label><input type="text" id="rep_rig" value="Stena IceMAX" oninput="buildReport()"></div>
+        </div>
+        <div class="grid-3">
+          <div class="field"><label>Service Company</label><input type="text" id="rep_co" value="Halliburton" oninput="buildReport()"></div>
+          <div class="field"><label>Casing Section</label><input type="text" id="rep_sec" value='9⅝" Surface Casing' oninput="buildReport()"></div>
+          <div class="field"><label>Date</label><input type="text" id="rep_date" value="2026-08-08" oninput="buildReport()"></div>
+        </div>
+        <button class="btn btn-teal" onclick="buildReport()" style="margin-top:8px">↻ Regenerate Report</button>
+      </div>
+      <div id="report_output"></div>
+    </div>
+
+  </div><!-- end content-area -->
+</div><!-- end main -->
+</div><!-- end shell -->
+
+<script>
+const g = 9.81;
+let currentModule = 'mud';
+let currentPages = {mud:'hydrostatic', cement:'volumes', report:'report'};
+let savedCalcs = {};
+
+function switchModule(mod){
+  currentModule = mod;
+  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+  event.target.classList.add('active');
+  ['mud','cement','report'].forEach(m=>{
+    document.getElementById('sidebar-'+m).classList.toggle('hidden', m!==mod);
+  });
+  const pg = currentPages[mod] || Object.keys(currentPages)[0];
+  showPage(mod, pg);
+}
+
+function switchPage(mod, pg){
+  currentPages[mod] = pg;
+  document.querySelectorAll('#sidebar-'+mod+' .sidebar-item').forEach(i=>i.classList.remove('active'));
+  event.currentTarget.classList.add('active');
+  showPage(mod, pg);
+}
+
+function showPage(mod, pg){
+  document.querySelectorAll('.tab-panels').forEach(p=>p.classList.remove('active'));
+  const el = document.getElementById('page-'+mod+'-'+pg);
+  if(el) el.classList.add('active');
+}
+
+function fmt(n, dec=2){ return isNaN(n)?'—':Number(n).toFixed(dec); }
+function fmtK(n){ return isNaN(n)?'—':(n/1000).toFixed(2); }
+
+function statusClass(val, min, max){
+  if(val < min) return 'danger';
+  if(val > max) return 'danger';
+  if(val < min*1.05 || val > max*0.95) return 'warn';
+  return 'ok';
+}
+
+function makeResult(label, value, unit, cls=''){
+  return `<div class="result-card ${cls}"><div class="result-label">${label}</div><div class="result-value">${value}</div><div class="result-unit">${unit}</div></div>`;
+}
+
+function makeAlert(type, icon, msg){
+  return `<div class="alert ${type}"><span class="alert-icon">${icon}</span><div>${msg}</div></div>`;
+}
+
+function makeGauge(label, pct, cls, val){
+  pct = Math.max(0, Math.min(100, pct));
+  return `<div class="gauge-row"><div class="gauge-label">${label}</div><div class="gauge-bar"><div class="gauge-fill ${cls}" style="width:${pct}%"></div></div><div class="gauge-val">${val}</div></div>`;
+}
+
+// ===== HYDROSTATIC =====
+function calcHydrostatic(){
+  const tvd = +document.getElementById('h_tvd').value;
+  const ppg = +document.getElementById('h_ppg').value;
+  const fg = +document.getElementById('h_fg').value;
+  const ob = +document.getElementById('h_ob').value/100;
+  const mw = +document.getElementById('h_mw').value;
+
+  const P_pore = ppg * tvd;
+  const P_frac = fg * tvd;
+  const rho_min = (P_pore / (g * tvd)) * 1000;
+  const rho_min_ob = rho_min * (1 + ob);
+  const rho_max = (P_frac / (g * tvd)) * 1000;
+  const P_design = mw * g * tvd / 1000;
+  const window_pct = ((mw - rho_min_ob) / (rho_max - rho_min_ob)) * 100;
+
+  savedCalcs.hydrostatic = {tvd, ppg, fg, mw, P_pore, P_frac, rho_min, rho_min_ob, rho_max, P_design};
+
+  const sc = statusClass(mw, rho_min_ob, rho_max);
+  const grid = document.getElementById('h_result_grid');
+  grid.innerHTML = 
+    makeResult('Min. Mud Weight', fmt(rho_min_ob,0), 'kg/m³ (with OB)', 'warn') +
+    makeResult('Max. Mud Weight', fmt(rho_max,0), 'kg/m³ (frac limit)', 'ok') +
+    makeResult('Designed MW', fmt(mw,0), 'kg/m³', sc) +
+    makeResult('Hydrostatic P', fmt(P_design,0), 'kPa', '') +
+    makeResult('Pore Pressure', fmt(P_pore,0), 'kPa', '') +
+    makeResult('Frac. Pressure', fmt(P_frac,0), 'kPa', 'ok');
+
+  const alert = document.getElementById('h_alert');
+  if(mw < rho_min_ob) alert.innerHTML = makeAlert('danger','⚠️',`<strong>KICK RISK:</strong> Designed MW ${fmt(mw,0)} kg/m³ is BELOW the minimum safe value of ${fmt(rho_min_ob,0)} kg/m³. Well is underbalanced — risk of formation influx.`);
+  else if(mw > rho_max) alert.innerHTML = makeAlert('danger','⚠️',`<strong>LOST CIRCULATION RISK:</strong> Designed MW ${fmt(mw,0)} kg/m³ EXCEEDS fracture gradient limit of ${fmt(rho_max,0)} kg/m³. Risk of induced fracture and lost returns.`);
+  else if(mw > rho_max*0.95) alert.innerHTML = makeAlert('warn','⚡',`<strong>CAUTION:</strong> Mud weight is within 5% of fracture gradient. Monitor annular pressure carefully.`);
+  else alert.innerHTML = makeAlert('ok','✓',`<strong>SAFE WINDOW:</strong> Designed mud weight is within the safe operating window. Overbalance: ${fmt((mw/rho_min-1)*100,1)}%. Frac margin: ${fmt((rho_max/mw-1)*100,1)}%.`);
+
+  const gauges = document.getElementById('h_gauges');
+  const wPct = Math.max(0,Math.min(100, window_pct));
+  gauges.innerHTML =
+    makeGauge('Min. Safe MW', (rho_min_ob/2400)*100, 'warn', fmt(rho_min_ob,0)+' kg/m³') +
+    makeGauge('Designed MW', (mw/2400)*100, sc, fmt(mw,0)+' kg/m³') +
+    makeGauge('Frac Gradient MW', (rho_max/2400)*100, 'ok', fmt(rho_max,0)+' kg/m³') +
+    makeGauge('Window Position', wPct, sc, fmt(wPct,1)+'%');
+}
+
+// ===== RHEOLOGY =====
+function calcRheology(){
+  const th600 = +document.getElementById('r_600').value;
+  const th300 = +document.getElementById('r_300').value;
+  const mw = +document.getElementById('r_mw').value;
+  const q_lpm = +document.getElementById('r_q').value;
+  const id_mm = +document.getElementById('r_id').value;
+  const sr = +document.getElementById('r_sr').value;
+
+  const PV = th600 - th300; // mPa.s
+  const YP_dial = th300 - PV; // dial units
+  const YP_pa = YP_dial * 0.4788; // Pa
+  const tau = YP_pa + (PV/1000) * sr; // Pa
+
+  const id_m = id_mm / 1000;
+  const A = Math.PI * (id_m/2)**2;
+  const q_m3s = q_lpm / 60000;
+  const v = q_m3s / A;
+  const Re = (928 * mw * v * id_m) / PV;
+  const flow = Re < 2100 ? 'Laminar' : Re < 3000 ? 'Transitional' : 'Turbulent';
+
+  savedCalcs.rheology = {PV, YP_pa, tau, Re, flow};
+
+  const grid = document.getElementById('r_result_grid');
+  grid.innerHTML =
+    makeResult('Plastic Viscosity', fmt(PV,0), 'mPa·s (cP)') +
+    makeResult('Yield Point', fmt(YP_pa,2), 'Pa') +
+    makeResult('Shear Stress', fmt(tau,2), 'Pa at γ̇='+sr+'s⁻¹') +
+    makeResult('Reynolds No.', fmt(Re,0), '('+flow+')', Re<2100?'ok':Re<3000?'warn':'');
+
+  const alert = document.getElementById('r_alert');
+  if(PV < 5) alert.innerHTML = makeAlert('danger','⚠️','PV too low — risk of barite sag and poor hole cleaning. Consider treating with deflocculant or thinning.');
+  else if(PV > 50) alert.innerHTML = makeAlert('warn','⡱','High PV — excessive pump pressure and ECD. Consider dilution or polymer treatment.');
+  else if(YP_pa < 3) alert.innerHTML = makeAlert('warn','⚡','Low YP — poor cuttings suspension when pump is off. Increase bentonite content or add XC polymer.');
+  else alert.innerHTML = makeAlert('ok','✓','Rheological properties within acceptable API operational ranges.');
+
+  const pvRange = PV>=10&&PV<=35 ? 'td-ok' : PV>=5&&PV<=50 ? 'td-warn' : 'td-danger';
+  const ypRange = YP_pa>=3&&YP_pa<=20 ? 'td-ok' : YP_pa>=1&&YP_pa<=30 ? 'td-warn' : 'td-danger';
+  const reRange = Re<2100 ? 'td-ok' : Re<3000 ? 'td-warn' : 'td-danger';
+  document.getElementById('r_table').innerHTML =
+    `<tr><td class="td-label">Plastic Viscosity (PV)</td><td class="${pvRange}">${fmt(PV,0)} mPa·s</td><td class="td-label">10 – 35 mPa·s</td><td class="${pvRange}">${pvRange==='td-ok'?'✓ OK':pvRange==='td-warn'?'⚡ Marginal':'⚠ Out of Range'}</td></tr>` +
+    `<tr><td class="td-label">Yield Point (YP)</td><td class="${ypRange}">${fmt(YP_pa,2)} Pa</td><td class="td-label">3 – 20 Pa</td><td class="${ypRange}">${ypRange==='td-ok'?'✓ OK':ypRange==='td-warn'?'⚡ Marginal':'⚠ Out of Range'}</td></tr>` +
+    `<tr><td class="td-label">Shear Stress at γ̇</td><td>${fmt(tau,2)} Pa</td><td class="td-label">Model output</td><td>—</td></tr>` +
+    `<tr><td class="td-label">Reynolds Number</td><td class="${reRange}">${fmt(Re,0)}</td><td class="td-label">< 2100 laminar</td><td class="${reRange}">${flow}</td></tr>`;
+}
+
+// ===== HYDRAULICS =====
+function calcHydraulics(){
+  const dh = +document.getElementById('hyd_dh').value / 1000;
+  const dpod = +document.getElementById('hyd_dpod').value / 1000;
+  const L = +document.getElementById('hyd_len').value;
+  const q_lpm = +document.getElementById('hyd_q').value;
+  const mw = +document.getElementById('hyd_mw').value;
+  const PV = +document.getElementById('hyd_pv').value;
+  const YP = +document.getElementById('hyd_yp').value;
+  const noz_cm2 = +document.getElementById('hyd_noz').value;
+
+  const q = q_lpm / 60000; // m³/s
+  const dh_ann = dh - dpod;
+  const A_ann = Math.PI/4 * (dh**2 - dpod**2);
+  const v_ann = q / A_ann;
+
+  // Annular pressure drop (Bingham-Plastic, Dodge-Metzner simplified)
+  const Re_ann = (109 * mw * v_ann * dh_ann) / PV;
+  const fric = Re_ann < 2100 ? (24/Re_ann) : 0.0791 / Re_ann**0.25;
+  const dP_ann = fric * (L / dh_ann) * (mw * v_ann**2 / 2) / 1000; // kPa
+
+  // Bit nozzle pressure drop
+  const noz_m2 = noz_cm2 / 10000;
+  const v_noz = q / noz_m2;
+  const dP_bit = mw * v_noz**2 / (2 * 1000); // kPa
+
+  const total = dP_ann + dP_bit;
+  savedCalcs.hydraulics = {v_ann, dP_ann, dP_bit, total, Re_ann};
+
+  document.getElementById('hyd_result_grid').innerHTML =
+    makeResult('Annular Velocity', fmt(v_ann,2), 'm/s') +
+    makeResult('Annular ΔP', fmt(dP_ann,0), 'kPa', dP_ann>5000?'danger':dP_ann>3000?'warn':'ok') +
+    makeResult('Bit Nozzle ΔP', fmt(dP_bit,0), 'kPa') +
+    makeResult('Total Circ. ΔP', fmt(total,0), 'kPa') +
+    makeResult('Re (Annular)', fmt(Re_ann,0), Re_ann<2100?'Laminar':Re_ann<3000?'Transitional':'Turbulent');
+
+  const al = document.getElementById('hyd_alert');
+  if(v_ann < 0.3) al.innerHTML = makeAlert('danger','⚠️','Annular velocity critically LOW — poor cuttings transport. Increase flow rate.');
+  else if(v_ann < 0.6) al.innerHTML = makeAlert('warn','⚡','Annular velocity below recommended 0.6 m/s for adequate hole cleaning.');
+  else if(dP_ann > 5000) al.innerHTML = makeAlert('warn','⚡','High annular pressure drop. Verify ECD will not exceed fracture gradient.');
+  else al.innerHTML = makeAlert('ok','✓',`Annular velocity ${fmt(v_ann,2)} m/s — adequate for hole cleaning. System hydraulics within normal parameters.`);
+
+  const gauges = document.getElementById('hyd_gauges');
+  gauges.innerHTML =
+    makeGauge('Annular ΔP / 10000 kPa', (dP_ann/10000)*100, dP_ann>5000?'danger':dP_ann>3000?'warn':'ok', fmt(dP_ann,0)+' kPa') +
+    makeGauge('Bit ΔP / 10000 kPa', (dP_bit/10000)*100, '', fmt(dP_bit,0)+' kPa') +
+    makeGauge('Annular Velocity / 2 m/s', (v_ann/2)*100, v_ann<0.3?'danger':v_ann<0.6?'warn':'ok', fmt(v_ann,2)+' m/s');
+}
+
+// ===== ECD =====
+function calcECD(){
+  const mw = +document.getElementById('ecd_mw').value;
+  const tvd = +document.getElementById('ecd_tvd').value;
+  const apl = +document.getElementById('ecd_apl').value;
+  const rop = +document.getElementById('ecd_rop').value;
+  const dh = +document.getElementById('ecd_dh').value / 1000;
+  const dp = +document.getElementById('ecd_dp').value / 1000;
+  const av = +document.getElementById('ecd_av').value;
+  const csg = +document.getElementById('ecd_csg').value;
+  const fg = +document.getElementById('ecd_fg').value;
+
+  const ecd = mw + (apl / (g * tvd)) * 1000;
+  const frac_p = fg * tvd;
+  const ecd_kpa = ecd * g * tvd / 1000;
+  const margin = frac_p - ecd_kpa;
+  const margin_pct = (margin / frac_p) * 100;
+
+  // Cuttings transport ratio
+  const A_ann = Math.PI/4 * (dh**2 - dp**2);
+  const cutRate_m3min = (rop/60) * Math.PI/4 * dh**2;
+  const cutConc = cutRate_m3min / (av * A_ann / 60) * 100;
+  const transportRatio = av / (rop / 60 * 3.281); // simplified
+
+  savedCalcs.ecd = {ecd, ecd_kpa, margin, frac_p, cutConc};
+
+  const sc = statusClass(ecd, 0, fg * tvd / (g * tvd / 1000));
+  document.getElementById('ecd_result_grid').innerHTML =
+    makeResult('ECD', fmt(ecd,0), 'kg/m³', ecd > fg*1000/9.81 ? 'danger' : 'ok') +
+    makeResult('ECD Pressure', fmt(ecd_kpa,0), 'kPa') +
+    makeResult('Frac Pressure', fmt(frac_p,0), 'kPa', 'ok') +
+    makeResult('Safety Margin', fmt(margin,0), 'kPa ('+fmt(margin_pct,1)+'%)', margin<500?'danger':margin<2000?'warn':'ok') +
+    makeResult('Cut. Conc. Est.', fmt(Math.min(cutConc,30),1), '% (est.)', cutConc>5?'warn':'ok');
+
+  const al = document.getElementById('ecd_alert');
+  if(ecd_kpa >= frac_p) al.innerHTML = makeAlert('danger','⚠️',`<strong>ECD EXCEEDS FRACTURE GRADIENT!</strong> ECD of ${fmt(ecd,0)} kg/m³ will induce lost circulation. Reduce flow rate or mud weight immediately.`);
+  else if(margin_pct < 5) al.innerHTML = makeAlert('danger','⚠️',`Safety margin only ${fmt(margin_pct,1)}% — critically low. Any surge or connection gas will breach fracture gradient.`);
+  else if(margin_pct < 15) al.innerHTML = makeAlert('warn','⚡',`ECD margin is tight (${fmt(margin_pct,1)}%). Monitor carefully. Avoid rapid pump startups.`);
+  else al.innerHTML = makeAlert('ok','✓',`ECD within safe window with ${fmt(margin_pct,1)}% margin to fracture gradient.`);
+
+  const tbody = document.getElementById('ecd_table');
+  const cut_ok = cutConc < 3;
+  const av_ok = av >= 30;
+  tbody.innerHTML = `
+    <table class="data-table" style="margin-top:0">
+      <thead><tr><th>Indicator</th><th>Value</th><th>Target</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr><td class="td-label">Annular Velocity</td><td>${fmt(av,0)} m/min</td><td class="td-label">> 30 m/min</td><td class="${av_ok?'td-ok':'td-danger'}">${av_ok?'✓ Adequate':'⚠ Insufficient'}</td></tr>
+        <tr><td class="td-label">Est. Cuttings Conc.</td><td>${fmt(Math.min(cutConc,30),1)} %</td><td class="td-label">< 3%</td><td class="${cut_ok?'td-ok':'td-warn'}">${cut_ok?'✓ OK':'⚡ High — pump out'}</td></tr>
+        <tr><td class="td-label">ECD vs Frac Gradient</td><td>${fmt(ecd,0)} kg/m³</td><td class="td-label">< ${fmt(fg*1000/g,0)} kg/m³</td><td class="${ecd<fg*1000/g?'td-ok':'td-danger'}">${ecd<fg*1000/g?'✓ Safe':'⚠ EXCEEDS'}</td></tr>
+        <tr><td class="td-label">Pressure Safety Margin</td><td>${fmt(margin,0)} kPa</td><td class="td-label">> 2000 kPa</td><td class="${margin>2000?'td-ok':margin>500?'td-warn':'td-danger'}">${margin>2000?'✓ Safe':margin>500?'⚡ Marginal':'⚠ Critical'}</td></tr>
+      </tbody>
+    </table>`;
+}
+
+// ===== VOLUMES =====
+function calcVolumes(){
+  const dhole = +document.getElementById('cv_dhole').value;
+  const cod = +document.getElementById('cv_cod').value;
+  const cid = +document.getElementById('cv_cid').value;
+  const L = +document.getElementById('cv_len').value;
+  const We = +document.getElementById('cv_excess').value / 100;
+  const tail_pct = +document.getElementById('cv_tail_pct').value / 100;
+  const ld = +document.getElementById('cv_ld').value;
+  const td = +document.getElementById('cv_td').value;
+  const spacer = +document.getElementById('cv_spacer').value;
+  const mud_d = +document.getElementById('cv_mud').value;
+
+  const V_ann = (Math.PI/4) * (dhole**2 - cod**2) * L * (1 + We);
+  const V_tail = V_ann * tail_pct;
+  const V_lead = V_ann - V_tail;
+  const V_casing = (Math.PI/4) * cid**2 * L;
+  const bbl = 6.2898;
+
+  savedCalcs.volumes = {V_ann, V_tail, V_lead, V_casing, spacer, ld, td, mud_d, dhole, cod, cid, L, We};
+
+  document.getElementById('cv_result_grid').innerHTML =
+    makeResult('Total Annular Vol.', fmt(V_ann,2), 'm³ ('+fmt(V_ann*bbl,1)+' bbl)', 'ok') +
+    makeResult('Casing Int. Vol.', fmt(V_casing,2), 'm³ (displacement)', '') +
+    makeResult('Excess Factor', fmt(We*100,0), '% hole washout', 'warn');
+
+  const tbody = document.getElementById('cv_table');
+  const rows = [
+    ['Lead Slurry', V_lead, ld],
+    ['Tail Slurry', V_tail, td],
+    ['Spacer / Flush', spacer, 1100],
+    ['Displacement Mud', V_casing, mud_d],
+  ];
+  tbody.innerHTML = rows.map(([n,v,d])=>
+    `<tr><td class="td-label">${n}</td><td>${fmt(v,2)}</td><td>${fmt(v*bbl,2)}</td><td>${fmt(v*d/1000,2)}</td><td>${d}</td></tr>`
+  ).join('');
+
+  const al = document.getElementById('cv_alert');
+  if(We > 0.25) al.innerHTML = makeAlert('warn','⚡','Excess factor > 25% indicates significant borehole washout or caliper irregularities. Consider additional slurry volume.');
+  else if(V_ann < 1) al.innerHTML = makeAlert('warn','⚡','Small annular volume — verify casing-hole dimensions. Short intervals may require batch mixing.');
+  else al.innerHTML = makeAlert('ok','✓',`Volumetrics computed. Total annular volume: ${fmt(V_ann,2)} m³ with ${fmt(We*100,0)}% washout factor applied.`);
+}
+
+// ===== SLURRY =====
+function calcSlurry(){
+  const bht = +document.getElementById('sl_bht').value;
+  const st = +document.getElementById('sl_st').value;
+  const density = +document.getElementById('sl_density').value;
+  const vol = +document.getElementById('sl_vol').value;
+  const app = document.getElementById('sl_app').value;
+  const cls = document.getElementById('sl_class').value;
+
+  const avg_temp = (bht + st) / 2;
+  // Thickening time model (empirical, decreases with temp)
+  const base_TT = cls === 'G' ? 240 : cls === 'H' ? 270 : 180; // min
+  const TT = base_TT * Math.exp(-0.008 * (bht - 60));
+  const pump_time = TT * 0.7; // 70% of thickening time as max pump time
+  const WCR = cls === 'G' ? 0.44 : cls === 'H' ? 0.38 : 0.46;
+  const sacks = vol * 1000 / (density * (1/(1+WCR)));
+  
+  savedCalcs.slurry = {bht, density, TT, pump_time, sacks, vol};
+
+  document.getElementById('sl_result_grid').innerHTML =
+    makeResult('Est. Thickening Time', fmt(TT,0), 'min at BHT', TT<120?'danger':TT<180?'warn':'ok') +
+    makeResult('Max Pump Time', fmt(pump_time,0), 'min (70% TT safety)', TT<120?'danger':'ok') +
+    makeResult('Cement Sacks Req.', fmt(sacks,0), 'sacks (94 lb/sack)') +
+    makeResult('Water/Cement Ratio', fmt(WCR,2), 'by weight');
+
+  // Additive logic
+  const additives = [];
+  if(bht > 110) additives.push({name:'AMPS Retarder',type:'Retarder',dose:'0.5–2.0%',fn:'Delays hydration at high BHT'});
+  else if(bht > 80) additives.push({name:'Lignosulfonate',type:'Retarder',dose:'0.1–0.5%',fn:'Moderate retardation 80–120°C'});
+  if(density > 1800) additives.push({name:'Barite / Hematite',type:'Weighting Agent',dose:'As required',fn:'Increase slurry density'});
+  if(density < 1500) additives.push({name:'Microspheres / Foam',type:'Extender',dose:'0.5–5.0%',fn:'Reduce slurry density'});
+  if(bht > 100) additives.push({name:'Silica Flour (35%)',type:'Strength Retrogression',dose:'35% BWOC',fn:'Prevents strength retrogression >110°C'});
+  additives.push({name:'Fluid Loss Additive',type:'FL Control',dose:'0.25–0.75%',fn:'Reduce filtrate loss < 50 mL/30min'});
+  if(app==='panda'||app==='suspension') additives.push({name:'Anti-Gas Migration Agent',type:'SPN',dose:'0.5–1.5%',fn:'Prevent gas channelling during WOC'});
+  additives.push({name:'Dispersant (Sulfonated)',type:'Rheology',dose:'0.1–0.3%',fn:'Reduce slurry viscosity, improve placement'});
+
+  const al = document.getElementById('sl_alert');
+  if(TT < 90) al.innerHTML = makeAlert('danger','⚠️',`<strong>CRITICAL:</strong> Estimated thickening time only ${fmt(TT,0)} min at ${bht}°C. Job cannot be safely pumped. MUST use high-temperature retarder and conduct lab testing.`);
+  else if(TT < 150) al.innerHTML = makeAlert('warn','⚡',`Thickening time marginal. Consider retarder system and run actual HPHT thickening time tests before job execution.`);
+  else al.innerHTML = makeAlert('ok','✓',`Adequate pump time. Max safe pump time: ${fmt(pump_time,0)} min. Always confirm with laboratory HPHT testing.`);
+
+  document.getElementById('sl_additives').innerHTML = additives.slice(0,3).map(a=>
+    `<div style="padding:8px 12px;background:var(--bg3);border-radius:var(--radius);margin-bottom:8px;border-left:3px solid var(--teal)">
+      <div style="font-weight:600;font-size:13px;color:var(--teal2)">${a.name}</div>
+      <div style="font-size:12px;color:var(--text2);margin-top:2px">${a.fn}</div>
+    </div>`).join('');
+
+  document.getElementById('sl_table').innerHTML = additives.map(a=>
+    `<tr><td class="td-label">${a.name}</td><td>${a.type}</td><td>${a.dose}</td><td class="td-label">${a.fn}</td></tr>`
+  ).join('');
+}
+
+// ===== BUMPING =====
+function calcBumping(){
+  const tvd = +document.getElementById('bp_tvd').value;
+  const sd = +document.getElementById('bp_sd').value;
+  const dd = +document.getElementById('bp_dd').value;
+  const burst = +document.getElementById('bp_burst').value;
+  const pump = +document.getElementById('bp_pump').value;
+  const cid = +document.getElementById('bp_cid').value;
+  const fg = +document.getElementById('bp_fg').value;
+
+  const P_slurry = sd * g * tvd / 1000;
+  const P_disp = dd * g * tvd / 1000;
+  const P_diff = P_slurry - P_disp;
+  const P_bump = P_diff + pump;
+  const frac_p = fg * tvd;
+  const burst_margin = (burst - P_bump) / burst * 100;
+
+  savedCalcs.bumping = {P_bump, frac_p, burst, P_diff, pump};
+
+  document.getElementById('bp_result_grid').innerHTML =
+    makeResult('Hydrostatic ΔP', fmt(P_diff,0), 'kPa (slurry − disp fluid)') +
+    makeResult('Plug Bump Pressure', fmt(P_bump,0), 'kPa (surface)', P_bump>burst*0.9?'danger':P_bump>burst*0.75?'warn':'ok') +
+    makeResult('Casing Burst Rating', fmt(burst,0), 'kPa', 'ok') +
+    makeResult('Burst Safety Margin', fmt(burst_margin,1), '%', burst_margin<20?'danger':burst_margin<35?'warn':'ok') +
+    makeResult('Frac Press at Shoe', fmt(frac_p,0), 'kPa', 'ok');
+
+  const al = document.getElementById('bp_alert');
+  if(P_bump > burst) al.innerHTML = makeAlert('danger','⚠️',`<strong>CASING FAILURE RISK:</strong> Plug bump pressure ${fmt(P_bump,0)} kPa EXCEEDS casing burst rating ${fmt(burst,0)} kPa. Reduce pump rate or adjust fluid densities.`);
+  else if(burst_margin < 20) al.innerHTML = makeAlert('danger','⚠️',`Burst safety margin only ${fmt(burst_margin,1)}%. Exceeds API 80% max working pressure limit. Recalculate job parameters.`);
+  else if(burst_margin < 35) al.innerHTML = makeAlert('warn','⚡',`Bumping pressure is ${fmt(100-burst_margin,1)}% of burst rating. Proceed carefully. Have pressure relief in place.`);
+  else al.innerHTML = makeAlert('ok','✓',`Plug bump pressure ${fmt(P_bump,0)} kPa — ${fmt(burst_margin,1)}% safety margin to burst rating. Job is within safe operational limits.`);
+
+  const g2 = document.getElementById('bp_gauges');
+  g2.innerHTML =
+    makeGauge('Bump Pressure vs Burst', (P_bump/burst)*100, P_bump>burst*0.9?'danger':'warn', fmt(P_bump,0)+' kPa') +
+    makeGauge('Bump Pressure vs Frac', (P_bump/frac_p)*100, P_bump>frac_p?'danger':'ok', fmt((P_bump/frac_p*100),1)+'%');
+}
+
+// ===== P&A =====
+function calcPandA(){
+  const type = document.getElementById('pa_type').value;
+  const top = +document.getElementById('pa_top').value;
+  const bot = +document.getElementById('pa_bot').value;
+  const dh = +document.getElementById('pa_dh').value;
+  const dp = +document.getElementById('pa_dp').value;
+  const dpid = +document.getElementById('pa_dpid').value;
+  const cd = +document.getElementById('pa_cd').value;
+  const pr = +document.getElementById('pa_pr').value;
+
+  const plug_len = bot - top;
+  const V_plug = (Math.PI/4) * dh**2 * plug_len * 1.15; // 15% excess
+  const V_pipe = (Math.PI/4) * dpid**2 * plug_len;
+  const total_vol = V_plug + V_pipe;
+  const pump_time = (total_vol * 1000) / pr; // minutes
+  const excess_slurry = V_plug * 0.15;
+
+  document.getElementById('pa_result_grid').innerHTML =
+    makeResult('Plug Length', fmt(plug_len,0), 'm (TVD interval)') +
+    makeResult('Total Slurry Vol.', fmt(total_vol,2), 'm³ (incl. 15% excess)', '') +
+    makeResult('Estimated Pump Time', fmt(pump_time,1), 'min at '+pr+' L/min') +
+    makeResult('Excess Cement', fmt(excess_slurry,2), 'm³');
+
+  const typeLabels = {panda:'Permanent P&A Plug',suspension:'Well Suspension Plug',sidetrack:'Open-Hole Sidetrack Plug',kickoff:'Kick-Off Plug'};
+  const minLen = {panda:60, suspension:30, sidetrack:15, kickoff:30};
+  const len_ok = plug_len >= minLen[type];
+
+  const al = document.getElementById('pa_alert');
+  if(!len_ok) al.innerHTML = makeAlert('danger','⚠️',`${typeLabels[type]} minimum length is ${minLen[type]}m per NORSOK/API standards. Current plug is only ${plug_len}m. Extend the cemented interval.`);
+  else al.innerHTML = makeAlert('ok','✓',`${typeLabels[type]}: ${plug_len}m plug meets minimum length requirement of ${minLen[type]}m.`);
+
+  const steps = [
+    `1. Run drill pipe to ${bot}m and circulate hole clean.`,
+    `2. Pump ${fmt(V_pipe,2)} m³ cement pre-flush down drillpipe.`,
+    `3. Batch mix ${fmt(total_vol,2)} m³ slurry at ${cd} kg/m³.`,
+    `4. Pump slurry at ${pr} L/min — estimated ${fmt(pump_time,1)} min.`,
+    `5. Overpull drillpipe ${fmt(plug_len + 15,0)}m above plug top (to ${fmt(top-15,0)}m).`,
+    `6. Displace with ${fmt(V_pipe,2)} m³ mud to balanced-plug condition.`,
+    `7. WOC minimum 8–12 hours (24h for P&A plugs).`,
+    `8. Tag plug top and pressure-test to ${fmt(cd*g*(bot-top)/1000,0)} kPa.`,
+  ];
+  document.getElementById('pa_procedure').innerHTML = steps.map(s=>
+    `<div style="padding:8px 12px;border-left:2px solid var(--border2);margin-bottom:6px;font-size:13px;color:var(--text2)">${s}</div>`
+  ).join('');
+}
+
+// ===== REPORT =====
+function buildReport(){
+  const well = document.getElementById('rep_well').value;
+  const field = document.getElementById('rep_field').value;
+  const rig = document.getElementById('rep_rig').value;
+  const co = document.getElementById('rep_co').value;
+  const sec = document.getElementById('rep_sec').value;
+  const date = document.getElementById('rep_date').value;
+
+  const sc = savedCalcs;
+  const h = sc.hydrostatic || {};
+  const r = sc.rheology || {};
+  const hy = sc.hydraulics || {};
+  const e = sc.ecd || {};
+  const v = sc.volumes || {};
+  const sl = sc.slurry || {};
+  const bp = sc.bumping || {};
+
+  document.getElementById('report_output').innerHTML = `
+    <div class="report-box">
+      <div class="report-title">📋 CEMENTING JOB PROCEDURE SHEET — ${well}</div>
+      <div class="grid-2" style="gap:16px;margin-bottom:16px">
+        <div>
+          <div class="report-row"><div class="report-key">Well Name</div><div class="report-val">${well}</div></div>
+          <div class="report-row"><div class="report-key">Field</div><div class="report-val">${field}</div></div>
+          <div class="report-row"><div class="report-key">Rig</div><div class="report-val">${rig}</div></div>
+        </div>
+        <div>
+          <div class="report-row"><div class="report-key">Service Company</div><div class="report-val">${co}</div></div>
+          <div class="report-row"><div class="report-key">Casing Section</div><div class="report-val">${sec}</div></div>
+          <div class="report-row"><div class="report-key">Date</div><div class="report-val">${date}</div></div>
+        </div>
+      </div>
+      
+      <div style="font-size:11px;font-weight:700;letter-spacing:1.5px;color:var(--teal2);text-transform:uppercase;margin:16px 0 8px">— Drilling Fluid Summary —</div>
+      <div class="grid-2" style="gap:16px">
+        <div>
+          ${h.mw ? `<div class="report-row"><div class="report-key">Mud Weight (Designed)</div><div class="report-val">${fmt(h.mw,0)} kg/m³</div></div>` : ''}
+          ${h.rho_min_ob ? `<div class="report-row"><div class="report-key">Min. Safe MW</div><div class="report-val">${fmt(h.rho_min_ob,0)} kg/m³</div></div>` : ''}
+          ${h.rho_max ? `<div class="report-row"><div class="report-key">Max. Safe MW (frac)</div><div class="report-val">${fmt(h.rho_max,0)} kg/m³</div></div>` : ''}
+          ${r.PV ? `<div class="report-row"><div class="report-key">Plastic Viscosity</div><div class="report-val">${fmt(r.PV,0)} mPa·s</div></div>` : ''}
+          ${r.YP_pa ? `<div class="report-row"><div class="report-key">Yield Point</div><div class="report-val">${fmt(r.YP_pa,2)} Pa</div></div>` : ''}
+        </div>
+        <div>
+          ${hy.v_ann ? `<div class="report-row"><div class="report-key">Annular Velocity</div><div class="report-val">${fmt(hy.v_ann,2)} m/s</div></div>` : ''}
+          ${hy.total ? `<div class="report-row"><div class="report-key">Total Circ. Pressure Drop</div><div class="report-val">${fmt(hy.total,0)} kPa</div></div>` : ''}
+          ${e.ecd ? `<div class="report-row"><div class="report-key">ECD</div><div class="report-val">${fmt(e.ecd,0)} kg/m³</div></div>` : ''}
+          ${e.margin ? `<div class="report-row"><div class="report-key">ECD Margin to Frac</div><div class="report-val">${fmt(e.margin,0)} kPa</div></div>` : ''}
+        </div>
+      </div>
+
+      <div style="font-size:11px;font-weight:700;letter-spacing:1.5px;color:var(--teal2);text-transform:uppercase;margin:16px 0 8px">— Cementing Programme —</div>
+      <div class="grid-2" style="gap:16px">
+        <div>
+          ${v.V_ann ? `<div class="report-row"><div class="report-key">Total Annular Volume</div><div class="report-val">${fmt(v.V_ann,2)} m³</div></div>` : ''}
+          ${v.V_lead ? `<div class="report-row"><div class="report-key">Lead Slurry Volume</div><div class="report-val">${fmt(v.V_lead,2)} m³ @ ${v.ld||0} kg/m³</div></div>` : ''}
+          ${v.V_tail ? `<div class="report-row"><div class="report-key">Tail Slurry Volume</div><div class="report-val">${fmt(v.V_tail,2)} m³ @ ${v.td||0} kg/m³</div></div>` : ''}
+          ${v.V_casing ? `<div class="report-row"><div class="report-key">Displacement Volume</div><div class="report-val">${fmt(v.V_casing,2)} m³</div></div>` : ''}
+        </div>
+        <div>
+          ${sl.TT ? `<div class="report-row"><div class="report-key">Est. Thickening Time</div><div class="report-val">${fmt(sl.TT,0)} min</div></div>` : ''}
+          ${sl.pump_time ? `<div class="report-row"><div class="report-key">Max Safe Pump Time</div><div class="report-val">${fmt(sl.pump_time,0)} min</div></div>` : ''}
+          ${sl.sacks ? `<div class="report-row"><div class="report-key">Cement Sacks Required</div><div class="report-val">${fmt(sl.sacks,0)} sacks</div></div>` : ''}
+          ${bp.P_bump ? `<div class="report-row"><div class="report-key">Plug Bump Pressure</div><div class="report-val">${fmt(bp.P_bump,0)} kPa</div></div>` : ''}
+        </div>
+      </div>
+
+      <div style="font-size:11px;color:var(--text3);margin-top:16px;padding-top:12px;border-top:1px solid var(--border)">
+        Generated by PyMudCement-Optima v1.0 | PENG 258 Capstone | UENR Dept. of Petroleum Engineering | ${date}
+        <br>⚠ This software output must be verified against laboratory HPHT test data before use in live well operations.
+      </div>
+    </div>`;
+}
+
+// Init all calculations on load
+window.onload = function(){
+  calcHydrostatic();
+  calcRheology();
+  calcHydraulics();
+  calcECD();
+  calcVolumes();
+  calcSlurry();
+  calcBumping();
+  calcPandA();
+  buildReport();
+};
+</script>
+</body>
+</html>
